@@ -7,7 +7,7 @@ on:
 
 jobs:
   create-brkout:
-    runs-on: [usvcs-devserver1]
+    runs-on: [usvcs-runner]
     steps:
     - uses: actions/checkout@v4
 
