@@ -17,6 +17,7 @@ jobs:
       run: |
         cd src/shippingservice
         docker buildx build . -t registry.gitlab.com/novusbee/microservices/shippingservice:freeshipV2
+        docker push registry.gitlab.com/novusbee/microservices/shippingservice:freeshipV2        
         echo "image=registry.gitlab.com/novusbee/microservices/shippingservice:freeshipV2" >> $GITHUB_OUTPUT
 
     - name: Create Breakout
