@@ -40,8 +40,6 @@ func CreateQuoteFromCount(count int) Quote {
 		log.Debugf("Free shipping provided: %d, %d", count, numItemsForFreeShipping)
 		quote = 0.00
 	}
-	// TODO: Nullifying the free shipping feature for testing
-	quote = 8.99
 	return CreateQuoteFromFloat(quote)
 }
 

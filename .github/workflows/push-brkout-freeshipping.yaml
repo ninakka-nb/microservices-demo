@@ -1,0 +1,58 @@
+name: "Create freeshipping breakout"
+on:
+  push:
+    # run on pushes to branch
+    branches:
+      - feature/freeshipping-breakout/freeship003
+
+jobs:
+  create-brkout:
+    runs-on: [usvcs-devserver1]
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Build shippingservice
+      id: build
+      timeout-minutes: 20
+      run: |
+        cd src/shippingservice
+        docker buildx build . -t registry.gitlab.com/novusbee/microservices/shippingservice:freeshipV2
+        echo "image=registry.gitlab.com/novusbee/microservices/shippingservice:freeshipV2" >> $GITHUB_OUTPUT
+
+    - name: Create Breakout
+      timeout-minutes: 20
+      run: |
+        cat <<EOF > breakout.yaml
+        apiVersion: appez.rightelast.com/v1beta1
+        kind: Breakout
+        metadata:
+          name: freeship003
+        spec:
+          clusterName: mykube
+          environment: devtest
+          application: onlineboutique
+          feature: freeshipping
+          baseBreakout: dflt--brkout
+          scope: public
+          moduleRefs:
+            - name: shippingservice
+              kind: Deployment
+              containers:
+              - name: server
+                image: ${{ steps.build.outputs.image }}
+                envType: "Add"
+                env:
+                - name: NUM_ITEMS_FOR_FREE_SHIPPING
+                  value: "003"
+            - kind: Service
+              name: shippingservice
+          routingRules:
+            httpRoute:
+              rules:
+                - matches:
+                  - headers:
+                    - type: "Exact"
+                      name: "Tenantname"
+                      value: "Tenant003"
+        EOF
+        curl -XPOST http://`kubectl get svc -n appez--brkout | grep contr | awk '{print $3;}'`:9090/api/breakouts -H 'Content-Type: application/x-yaml' --data-binary @breakout.yaml
