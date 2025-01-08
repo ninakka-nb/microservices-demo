@@ -64,7 +64,7 @@ func (fe *frontendServer) homeHandler(w http.ResponseWriter, r *http.Request) {
 	log.Debugf("Processing request %v", r.URL)
 
 	if !isAuthenticated(r, log) {
-		log.Info("User is not authenticated. Redirecting to login page")
+		log.Info("User is not authenticated. Redirecting to login page.")
 		http.Redirect(w, r, "/login", http.StatusFound)
 		return
 	}
