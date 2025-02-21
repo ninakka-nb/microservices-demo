@@ -1,0 +1,101 @@
+# Look for the tags __MAKE__CHANGES__FROM__HERE__ and __MAKE__CHANGES__TO__HERE__
+name: "Update and deploy breakout"
+on:
+  push:
+    # run on push to branch
+    branches:
+      - dev--ftr/sports-cost004--brkout/sports-cost004
+
+jobs:
+  create-brkout:
+    runs-on: [usvcs-runner]
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Build deployments
+      id: build
+      timeout-minutes: 20
+      run: |
+        # __MAKE__CHANGES__FROM__HERE__
+        # place build commands here
+        # Build image and push to registry for container 'server' of deployment 'frontend'
+        # echo "IMAGE_frontend_server=<<frontend_server_image:tag>>" >> $GITHUB_OUTPUT
+        # Build image and push to registry for container 'server' of deployment 'productcatalogservice'
+        # echo "IMAGE_productcatalogservice_server=<<productcatalogservice_server_image:tag>>" >> $GITHUB_OUTPUT
+        # __MAKE__CHANGES__TO__HERE__
+
+    - name: Create Breakout
+      timeout-minutes: 20
+      run: |
+        cat <<EOF > breakout.yaml
+        apiVersion: appez.novusbee.com/v1beta1
+        kind: Context
+        metadata:
+          creationTimestamp: null
+          name: sports-cost004
+          namespace: appez-kdb8-j582-l7cf02-m4bb6b9f
+        spec:
+          application: onlineboutique
+          baseBreakout: appez-dflt-brkout
+          cluster: clstr1
+          environment: dev
+          feature: sports-cost004
+          moduleRefs:
+          - containers:
+            - image: ${{ steps.build.outputs.IMAGE_frontend_server }}
+              name: server
+              resources:
+                limits:
+                  cpu: 35m
+                  memory: 35Mi
+                requests:
+                  cpu: 25m
+                  memory: 25Mi
+            kind: Deployment
+            name: frontend
+          - kind: Service
+            name: frontend
+          - containers:
+            - args:
+              - -extracost=004
+              argsType: Add
+              image: ${{ steps.build.outputs.IMAGE_productcatalogservice_server }}
+              livenessProbe:
+                exec:
+                  command:
+                  - /bin/grpc_health_probe
+                  - -addr=:3550
+                failureThreshold: 10
+                periodSeconds: 30
+                successThreshold: 1
+                timeoutSeconds: 30
+              livenessProbeType: Replace
+              name: server
+              readinessProbe:
+                exec:
+                  command:
+                  - /bin/grpc_health_probe
+                  - -addr=:3550
+                failureThreshold: 10
+                periodSeconds: 30
+                successThreshold: 1
+                timeoutSeconds: 30
+              readinessProbeType: Replace
+              resources:
+                limits:
+                  cpu: 35m
+                  memory: 35Mi
+                requests:
+                  cpu: 25m
+                  memory: 25Mi
+            kind: Deployment
+            name: productcatalogservice
+          - kind: Service
+            name: productcatalogservice
+          routingRules:
+            httpRoute: {}
+          scope: public
+        status: {}
+        EOF
+        #
+        # curl -X PUT http://appez-api.rightelast.com:20082/api/v1/breakouts -H 'Content-Type: application/x-yaml' --data-binary @breakout.yaml
