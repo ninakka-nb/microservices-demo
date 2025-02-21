@@ -1,0 +1,62 @@
+# Look for the tags __MAKE__CHANGES__FROM__HERE__ and __MAKE__CHANGES__TO__HERE__
+name: "Update and deploy breakout"
+on:
+  push:
+    # run on push to branch
+    branches:
+      - dev--ftr/showrecos--brkout/showrecos-brkout2
+
+jobs:
+  create-brkout:
+    runs-on: [usvcs-runner]
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Build deployments
+      id: build
+      timeout-minutes: 20
+      run: |
+        # __MAKE__CHANGES__FROM__HERE__
+        # place build commands here
+        # Build image and push to registry for container 'server' of deployment 'recommendationservice'
+        # echo "IMAGE_recommendationservice_server=<<recommendationservice_server_image:tag>>" >> $GITHUB_OUTPUT
+        # __MAKE__CHANGES__TO__HERE__
+
+    - name: Create Breakout
+      timeout-minutes: 20
+      run: |
+        cat <<EOF > breakout.yaml
+        apiVersion: appez.rightelast.com/v1beta1
+        kind: Breakout
+        metadata:
+          creationTimestamp: null
+          name: showrecos-brkout2
+          namespace: appez-kdb8-j582-l7cf02-m7dff987
+        spec:
+          application: onlineboutique
+          baseBreakout: appez-dflt-brkout
+          cluster: clstr1
+          environment: dev
+          feature: showrecos
+          moduleRefs:
+          - containers:
+            - image: ${{ steps.build.outputs.IMAGE_recommendationservice_server }}
+              name: server
+              resources: {}
+            kind: Deployment
+            name: recommendationservice
+          - kind: Service
+            name: recommendationservice
+          routingRules:
+            httpRoute:
+              rules:
+              - matches:
+                - headers:
+                  - name: X-forwarded-Host
+                    type: Exact
+                    value: appez-multiusertest-showrecos-brkout2.rightelast.com
+          scope: public
+        status: {}
+        EOF
+        #
+        # curl -X PUT http://appez-api.rightelast.com:20082/api/v1/breakouts -H 'Content-Type: application/x-yaml' --data-binary @breakout.yaml
