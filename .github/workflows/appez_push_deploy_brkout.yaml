@@ -14,13 +14,12 @@ jobs:
 
     - name: Build deployments
       id: build
-      timeout-minutes: 2
+      timeout-minutes: 20
       run: |
         # __MAKE__CHANGES__FROM__HERE__
-        cd src/shippingservice
-        docker buildx build . -t registry.gitlab.com/novusbee/microservices/shippingservice:freeshipV3
-        docker push registry.gitlab.com/novusbee/microservices/shippingservice:freeshipV3
-        echo "IMAGE_shippingservice_server=registry.gitlab.com/novusbee/microservices/shippingservice:freeshipV3" >> $GITHUB_OUTPUT        
+        # place build commands here
+        # Build image and push to registry for container 'server' of deployment 'shippingservice'
+        # echo "IMAGE_shippingservice_server=<<shippingservice_server_image:tag>>" >> $GITHUB_OUTPUT
         # __MAKE__CHANGES__TO__HERE__
 
     - name: Create Breakout
@@ -32,11 +31,11 @@ jobs:
         metadata:
           creationTimestamp: null
           name: freeship003
-          namespace: appez--j582--l7cf02--m74b882c
+          namespace: appez-kdb8-j582-l7cf02-m74b882c
         spec:
           application: onlineboutique
-          baseBreakout: dflt--brkout
-          clusterName: mykube
+          baseBreakout: appez-dflt-brkout
+          cluster: clstr1
           environment: dev
           feature: freeshipping
           moduleRefs:
@@ -79,15 +78,9 @@ jobs:
           - kind: Service
             name: shippingservice
           routingRules:
-            httpRoute:
-              rules:
-              - matches:
-                - headers:
-                  - name: Tenantname
-                    type: Exact
-                    value: Tenant003
+            httpRoute: {}
           scope: public
         status: {}
         EOF
-        
-        curl -X PUT http://appez-api.rightelast.com:20082/api/breakouts -H 'Content-Type: application/x-yaml' --data-binary @breakout.yaml
+        #
+        # curl -X PUT http://appez-api.rightelast.com:20082/api/v1/breakouts -H 'Content-Type: application/x-yaml' --data-binary @breakout.yaml
