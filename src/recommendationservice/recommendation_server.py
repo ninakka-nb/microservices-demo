@@ -77,7 +77,7 @@ class RecommendationService(demo_pb2_grpc.RecommendationServiceServicer):
         indices = random.sample(range(num_products), num_return)
         # fetch product ids from indices
         prod_list = [filtered_products[i] for i in indices]
-        # logger.info("Request headers={}".format(request.headers))
+        logger.info("Request headers={}".format(request.headers))
         logger.info("[Recv ListRecommendations] product_ids={}".format(prod_list))
         # logger.debug("Not showing recommendations")
         # prod_list = []
