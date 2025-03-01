@@ -1,13 +1,16 @@
 # Look for the tags __MAKE__CHANGES__FROM__HERE__ and __MAKE__CHANGES__TO__HERE__
 name: "Update and deploy breakout"
 on:
-  push:
-    # run on push to branch
-    branches:
-      - dev--ftr/freeshipping--brkout/freeship003
+  pull_request:
+    # run on pull request from branch
+    types:
+    - opened
+    - edited
+    - reopened
 
 jobs:
   create-brkout:
+    if: github.head_ref == dev--ftr/freeshipping--brkout/freeship003
     runs-on: [usvcs-runner]
     steps:
     - uses: actions/checkout@v4
@@ -31,11 +34,11 @@ jobs:
         metadata:
           creationTimestamp: null
           name: freeship003
-          namespace: appez-kdb8-j582-l7cf02-m74b882c
+          namespace: appez-kb51-j582-l7cf02-m74b882c
         spec:
           application: onlineboutique
           baseBreakout: appez-dflt-brkout
-          cluster: clstr1
+          cluster: clstr0001
           environment: dev
           feature: freeshipping
           moduleRefs:
@@ -83,4 +86,4 @@ jobs:
         status: {}
         EOF
         #
-        # curl -X PUT http://appez-api.rightelast.com:20082/api/v1/breakouts -H 'Content-Type: application/x-yaml' --data-binary @breakout.yaml
+        curl -X PUT https://appez-api.rightelast.com/api/v1/breakouts -H 'Content-Type: application/x-yaml' --data-binary @breakout.yaml
