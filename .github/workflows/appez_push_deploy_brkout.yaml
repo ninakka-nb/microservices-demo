@@ -16,11 +16,11 @@ jobs:
       id: build
       timeout-minutes: 20
       run: |
-        cd src/recommendationservice
-        docker buildx build . -t registry.gitlab.com/novusbee/microservices/recommendationservice:showrecos
-        docker push registry.gitlab.com/novusbee/microservices/recommendationservice:showrecos
-        cd ../..
-        echo "IMAGE_recommendationservice_server=registry.gitlab.com/novusbee/microservices/recommendationservice:showrecos" >> $GITHUB_OUTPUT
+        # __MAKE__CHANGES__FROM__HERE__
+        # place build commands here
+        # Build image and push to registry for container 'server' of deployment 'recommendationservice'
+        # echo "IMAGE_recommendationservice_server=<<recommendationservice_server_image:tag>>" >> $GITHUB_OUTPUT
+        # __MAKE__CHANGES__TO__HERE__
 
     - name: Create Breakout
       timeout-minutes: 20
