@@ -12,9 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-FROM python:3.10.8-slim@sha256:49749648f4426b31b20fca55ad854caa55ff59dc604f2f76b57d814e0a47c181 as base
+FROM python:3.10.8-slim@sha256:49749648f4426b31b20fca55ad854caa55ff59dc604f2f76b57d814e0a47c181 AS base
 
-FROM base as builder
+FROM base AS builder
 
 RUN apt-get -qq update \
     && apt-get install -y --no-install-recommends \
@@ -31,7 +31,7 @@ RUN wget -qO/bin/grpc_health_probe https://github.com/grpc-ecosystem/grpc-health
 COPY requirements.txt .
 RUN pip install -r requirements.txt
 
-FROM base as without-grpc-health-probe-bin
+FROM base AS without-grpc-health-probe-bin
 # Enable unbuffered logging
 ENV PYTHONUNBUFFERED=1
 
@@ -45,7 +45,7 @@ COPY --from=builder /usr/local/lib/python3.10/ /usr/local/lib/python3.10/
 COPY . .
 
 # set listen port
-ENV PORT "8080"
+ENV PORT="8080"
 EXPOSE 8080
 
 ENTRYPOINT ["python", "recommendation_server.py"]
