@@ -1,0 +1,57 @@
+# Look for the tags __MAKE__CHANGES__FROM__HERE__ and __MAKE__CHANGES__TO__HERE__
+name: "Update and deploy breakout"
+on:
+  push:
+    # run on push to branch
+    branches:
+    - dev--ftr/showrecos--brkout/showrecos-brkout01
+
+jobs:
+  create-brkout:
+    runs-on: [usvcs-runner]
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Build deployments
+      id: build
+      timeout-minutes: 20
+      run: |
+        # __MAKE__CHANGES__FROM__HERE__
+        # place build commands here
+        # Build image and push to registry for container 'server' of deployment 'recommendationservice'
+        # echo "IMAGE_recommendationservice_server=<<recommendationservice_server_image:tag>>" >> $GITHUB_OUTPUT
+        # __MAKE__CHANGES__TO__HERE__
+
+    - name: Create Breakout
+      timeout-minutes: 20
+      run: |
+        cat <<EOF > breakout.yaml
+        apiVersion: appez.rightelast.com/v1beta1
+        kind: Breakout
+        metadata:
+          creationTimestamp: null
+          name: showrecos-brkout01
+          namespace: appez-kb51-j582-l7cf02-m7dff987
+        spec:
+          application: onlineboutique
+          baseBreakout: appez-dflt-brkout
+          cluster: clstr0001
+          environment: dev
+          feature: showrecos
+          moduleRefs:
+          - containers:
+            - image: ${{ steps.build.outputs.IMAGE_recommendationservice_server }}
+              name: server
+              resources: {}
+            kind: Deployment
+            name: recommendationservice
+          - kind: Service
+            name: recommendationservice
+          routingMode: basic
+          routingRules:
+            httpRoute: {}
+          scope: public
+        status: {}
+        EOF
+        #
+        curl -X PUT https://appez-api.rightelast.com/api/v1/breakouts -H 'Content-Type: application/x-yaml' --data-binary @breakout.yaml
