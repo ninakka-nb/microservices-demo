@@ -31,11 +31,11 @@ jobs:
         metadata:
           creationTimestamp: null
           name: showrecos-brkout01
-          namespace: appez-kb51-j582-l7cf02-m7dff987
+          namespace: appez-kf1f-j582-l7cf02-m7dff987
         spec:
           application: onlineboutique
           baseBreakout: appez-dflt-brkout
-          cluster: clstr0001
+          cluster: clstr-do-001
           environment: dev
           feature: showrecos
           moduleRefs:
